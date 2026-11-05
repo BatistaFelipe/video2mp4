@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (e.g. v1.0.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Fetch ffmpeg
+        shell: pwsh
+        run: .\scripts\fetch_ffmpeg.ps1
+
+      - name: Run tests
+        run: python -m pytest --cov=src --cov-report=term-missing --cov-fail-under=80
+
+      - name: Build exe
+        run: pyinstaller --noconfirm --onefile --windowed --name video2mp4 --add-data "vendor/ffmpeg/bin/ffmpeg.exe;vendor/ffmpeg/bin" src/main.py
+
+      - name: Resolve release tag
+        id: tag
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF -like "refs/tags/*") {
+            $tag = $env:GITHUB_REF -replace "^refs/tags/", ""
+          } else {
+            $tag = "${{ github.event.inputs.tag }}"
+          }
+          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: video2mp4-${{ steps.tag.outputs.tag }}
+          path: dist/video2mp4.exe
+          if-no-files-found: error
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }}
+          files: dist/video2mp4.exe
+          generate_release_notes: true
+          draft: false
+          prerelease: false
