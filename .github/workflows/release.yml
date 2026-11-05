@@ -55,11 +55,31 @@ jobs:
           }
           "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
+      - name: Stage release artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release-artifacts | Out-Null
+          Copy-Item dist/video2mp4.exe release-artifacts/
+          Copy-Item vendor/ffmpeg/LICENSE.txt release-artifacts/ffmpeg-LICENSE.txt
+          Copy-Item LICENSE release-artifacts/video2mp4-LICENSE.txt
+          @'
+          video2mp4 bundles the LGPL build of FFmpeg (https://ffmpeg.org/).
+
+          - video2mp4 source code: MIT License (see video2mp4-LICENSE.txt)
+          - FFmpeg binary: LGPL v2.1+ (see ffmpeg-LICENSE.txt)
+
+          Pre-built FFmpeg binary source:
+          https://github.com/BtbN/FFmpeg-Builds (ffmpeg-master-latest-win64-lgpl)
+
+          Upstream FFmpeg source repository:
+          https://git.ffmpeg.org/ffmpeg.git
+          '@ | Out-File -FilePath release-artifacts/README.txt -Encoding utf8
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: video2mp4-${{ steps.tag.outputs.tag }}
-          path: dist/video2mp4.exe
+          path: release-artifacts/
           if-no-files-found: error
 
       - name: Publish release
@@ -67,7 +87,7 @@ jobs:
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
           name: ${{ steps.tag.outputs.tag }}
-          files: dist/video2mp4.exe
+          files: release-artifacts/*
           generate_release_notes: true
           draft: false
           prerelease: false

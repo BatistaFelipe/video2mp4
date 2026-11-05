@@ -35,10 +35,12 @@ python -m venv .venv
 > If PowerShell blocks the script with an ExecutionPolicy error, run it as:
 > `powershell -ExecutionPolicy Bypass -File .\scripts\fetch_ffmpeg.ps1`
 
-The last step downloads the official `ffmpeg-release-essentials` build from
-[gyan.dev](https://www.gyan.dev/ffmpeg/builds/) and places `ffmpeg.exe` in
-`vendor\ffmpeg\bin\`. This path is in `.gitignore` — every developer /
-machine downloads its own copy.
+The last step downloads the official LGPL build of FFmpeg
+(`ffmpeg-master-latest-win64-lgpl` from
+[BtbN/FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds)) and places
+`ffmpeg.exe` in `vendor\ffmpeg\bin\` plus the FFmpeg `LICENSE.txt` in
+`vendor\ffmpeg\`. This path is in `.gitignore` — every developer / machine
+downloads its own copy.
 
 ## Running from source
 
@@ -126,17 +128,25 @@ This project is released under the [MIT License](LICENSE).
 
 ### ffmpeg bundling note
 
-`scripts/fetch_ffmpeg.ps1` downloads the `ffmpeg-release-essentials` build
-from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/), which is a **GPL**
-build (it links against GPL components such as `libx264`). The MIT license
-above applies only to the Python source code in this repository.
+`scripts/fetch_ffmpeg.ps1` downloads the `ffmpeg-master-latest-win64-lgpl`
+build from [BtbN/FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds),
+which is an **LGPL v2.1+** build (no GPL-only components such as `libx264`
+or `libx265`). The MIT license above applies to the Python source code in
+this repository; the bundled `ffmpeg.exe` keeps its own LGPL terms — the
+upstream `LICENSE.txt` is copied to `vendor\ffmpeg\LICENSE.txt` during
+setup.
 
 - Publishing / redistributing the **source** of this project: unaffected —
   the repo does not ship any ffmpeg binary (`vendor/` is gitignored).
-- Distributing the **standalone `.exe`** produced by PyInstaller: the
-  bundled `ffmpeg.exe` carries its GPL terms with it. If you plan to
-  redistribute the `.exe`, you must comply with the ffmpeg build's license.
-  See [ffmpeg.org/legal.html](https://ffmpeg.org/legal.html).
+- Distributing the **standalone `.exe`** produced by PyInstaller: ship the
+  FFmpeg `LICENSE.txt` alongside the `.exe` and keep the source of the
+  bundled FFmpeg build reachable (BtbN publishes the exact source tree used
+  for each release). The release workflow in `.github/workflows/release.yml`
+  does this automatically — it attaches `ffmpeg-LICENSE.txt`,
+  `video2mp4-LICENSE.txt`, and a `README.txt` with the source URLs to every
+  GitHub Release.
+- See [ffmpeg.org/legal.html](https://ffmpeg.org/legal.html) for the
+  authoritative statement on FFmpeg licensing.
 
 The `fetch_ffmpeg.ps1` script downloads over HTTPS but does **not** verify a
 SHA-256 hash of the archive. If you need stronger supply-chain guarantees,

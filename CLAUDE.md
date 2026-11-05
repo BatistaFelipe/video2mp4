@@ -64,4 +64,4 @@ MVC with strict layering — the View never touches ffmpeg; the Controller never
 
 ## ffmpeg bundling
 
-`vendor/` is gitignored — each machine downloads its own `ffmpeg.exe` via `scripts/fetch_ffmpeg.ps1` (pulls `ffmpeg-release-essentials` from gyan.dev). The PyInstaller build embeds that same binary via `--add-data`; at runtime, `ffmpeg_locator` finds it under `sys._MEIPASS` for the frozen case.
+`vendor/` is gitignored — each machine downloads its own `ffmpeg.exe` via `scripts/fetch_ffmpeg.ps1` (pulls the LGPL build `ffmpeg-master-latest-win64-lgpl` from [BtbN/FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds) and also drops the upstream `LICENSE.txt` at `vendor/ffmpeg/LICENSE.txt` for redistribution compliance). The PyInstaller build embeds that same binary via `--add-data`; at runtime, `ffmpeg_locator` finds it under `sys._MEIPASS` for the frozen case. The release workflow attaches `ffmpeg-LICENSE.txt`, `video2mp4-LICENSE.txt`, and a `README.txt` with the FFmpeg source URL to every GitHub Release.
