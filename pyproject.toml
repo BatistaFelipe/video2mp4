@@ -1,0 +1,35 @@
+[project]
+name = "video2mp4"
+version = "0.1.0"
+description = "Windows GUI utility that rewraps DVR-exported videos into clean .mp4 containers using ffmpeg (stream copy, no reencoding)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Felipe Marta Batista" }]
+keywords = ["ffmpeg", "video", "mp4", "dvr", "tkinter", "gui"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Environment :: Win32 (MS Windows)",
+    "Topic :: Multimedia :: Video :: Conversion",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["src/views/*", "src/main.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]

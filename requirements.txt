@@ -1,0 +1,3 @@
+# Runtime dependencies: none. video2mp4 uses only the Python standard library
+# (tkinter, subprocess, pathlib, threading, queue). Development and build
+# tooling lives in requirements-dev.txt.
